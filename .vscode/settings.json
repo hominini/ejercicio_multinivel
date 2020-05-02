@@ -1,0 +1,9 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#02360C",
+        "titleBar.activeBackground": "#034C11",
+        "titleBar.activeForeground": "#ECFEEF"
+    },
+    "python.pythonPath": "/home/simian/workspaces/python/entornos/multinivel-env/bin/python",
+    "python.formatting.provider": "autopep8"
+}

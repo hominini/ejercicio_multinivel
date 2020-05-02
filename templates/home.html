@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <h1>0RGANIZACIÓN 0</h1>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-12">
+        <h2>Detalles del equipo</h2>
+        <div id="detalles_miembro" class="card">
+            <div id="card_body" class="card-body">
+                <h5>Ventas del equipo</h5>
+                <p><span id="ventas_equipo"></span></p>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <h2>Árbol del equipo</h2>
+        <ul id="myUL" class="list-group list-group-flush card">
+            {% for member in team recursive %}
+            <li class="list-group-item" href="#">
+                {% if member.child_members %}
+                <span class="caret"></span>
+                <button id="{{ member.id }}" type="button" class="btn btn-link"
+                    onclick="showMemberInfo(this)">{{ member.id }}</button>
+                {% else %}
+                <button id="{{ member.id }}" type="button" class="btn btn-link"
+                    onclick="showMemberInfo(this)">{{ member.id }}</button>
+                {% endif %}
+                {% if member.child_members %}
+                <ul class="nested">{{ loop(member.child_members) }}</ul>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-3 col-sm-12">
+        <h2>Detalles del nodo</h2>
+        <div id="detalles_miembro" class="card">
+            <div id="card_header" class="card-header">
+                Detalles del usuario
+            </div>
+            <div id="card_body" class="card-body">
+                <h5 class="card-title"><strong>Nombre: </strong><span id="card_title"></span></h5>
+                Ventas
+                <ul class="list-group" id="ventas" type="a"></ul>
+                Comisiones
+                <ul class="list-group" id="comisiones" type="a"></ul>
+                Bonos
+                <ul class="list-group" id="bonos" type="a"></ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    var toggler = document.getElementsByClassName("caret");
+    var i;
+
+    for (i = 0; i < toggler.length; i++) {
+        toggler[i].addEventListener("click", function () {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+        });
+    }
+</script>
+{% endblock content %}
+
+{% block custom_page_js %}
+<script>
+
+    let detalles_card = document.querySelector('#detalles_miembro')
+    detalles_card.style.display = 'none';
+
+    let server = 'http://127.0.0.1:5000'
+
+    function showMemberInfo(e) {
+        detalles_card.style.display = 'block';
+
+        fetch(server + '/team_member/' + e.id)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                setCardAtributes(data.id, data.ventas, data.comisiones, data.bonos);
+            })
+
+        fetch(server + '/team/' + 'tm_1' + '/total_sales')
+            .then(response => response.json())
+            .then(data => {
+                setTotalSales(data.team_sales);
+            })
+    }
+
+    function setCardAtributes(titulo, ventas, comisiones, bonos) {
+        document.querySelector('#card_title').textContent = titulo;
+        let listaVentas = document.querySelector('#ventas');
+        vaciarElemento(listaVentas);
+        ventas.forEach(elem => {
+            addLiElement(listaVentas, elem);
+        });
+        let listaComisiones = document.querySelector('#comisiones');
+        vaciarElemento(listaComisiones);
+        comisiones.forEach(elem => {
+            addLiElement(listaComisiones, elem);
+        });
+        let listaBonos = document.querySelector('#bonos');
+        vaciarElemento(listaBonos);
+        bonos.forEach(elem => {
+            let str = 'Obtuvo ' + elem.bond_amount + ' por bono tipo ' + elem.type;
+            addLiElement(listaBonos, str);
+        });
+
+    }
+
+    function setTotalSales(total_ventas) {
+        document.querySelector('#ventas_equipo').textContent = total_ventas;
+        
+    }
+
+    function addLiElement(node, content) {
+        var entry = document.createElement('li');
+        entry.className += 'list-group-item list-group-item-success';
+        entry.appendChild(document.createTextNode(content));
+        node.appendChild(entry);
+    }
+
+    function vaciarElemento(nodo) {
+        nodo.innerHTML = '';
+    }
+
+    function toogleElement(elemId) {
+        var x = document.getElementById(elemId);
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+
+</script>
+{% endblock %}
